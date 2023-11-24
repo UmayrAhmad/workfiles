@@ -1,0 +1,72 @@
+from IPython.utils.path import get_xdg_cache_dir
+from re import I
+import string
+import random
+
+class AffineCipher:
+    def __init__(self, a, b):
+        if self._gcd(a, 26) != 1:
+
+            raise ValueError("A and 26 must be coprime"); #checks the value of the two parameters. used to raise an exception when the key is not valid
+
+        self.a = a
+        self.b = b
+
+    def encrypt(self, plaintext):
+        plaintext = self._normalize(plaintext)
+        ciphertext = ""
+        for char in plaintext:
+            if char in string.ascii_uppercase:
+                x = ord(char) - ord('A')
+                y = (self.a * x + self.b) % 26
+                ciphertext += chr(y + ord('A'))
+            else:
+                ciphertext += char
+        return ciphertext #encrypts the text
+
+    def decrypt(self, ciphertext):
+        ciphertext = self._normalize(ciphertext)
+        plaintext = ""
+        a_inv = self._modinv(self.a, 26)
+        for char in ciphertext: # setting up the loop
+            if char in string.ascii_uppercase: # this checks to see if the letter is upper case letter of the alphabet.
+                y = ord(char) - ord('A')
+                x = (a_inv * (y - self.b)) % 26
+                plaintext += chr(x + ord('A'))
+            else:
+                plaintext += char
+        return plaintext #decrypts the text to return the plaintext
+
+    def _normalize(self, text):
+        return text.upper().replace(" ", "") #returns only uppercase
+
+    def _gcd(self, a, b):
+        while b:
+            a, b = b, a % b
+        return a
+
+    def _modinv(self, a, m):
+        # calculate the modular inverse of a mod m using the extended Euclidean algorithm
+        
+        def _egcd(a, b):
+            if a == 0:
+                return (b, 0, 1)
+            else:
+                gcd, x, y = _egcd(b % a, a)
+                return (gcd, y - (b // a) * x, x) #extended version for the euclidian algorithm takes two integers a and b as inputs
+                #gcd function is used to calculate the modular inverse of the parameter
+
+        gcd, x, _ = _egcd(a, m)
+        if gcd != 1:
+            raise ValueError("a and m must be coprime")
+        return x % m #implements the modular multiplicative function. calls a helper function, checks is gcd is equal to one. if they are 1 hten a and m are coprime
+
+
+a = random.randint(1, 25)  # randomly choose a from 1 to 25 (inclusive)
+b = random.randint(0, 25)  # randomly choose b from 0 to 25 (inclusive)
+cipher = AffineCipher(a, b)
+plaintext = "Hello World"
+ciphertext = cipher.encrypt(plaintext)
+print("Ciphertext:", ciphertext)
+decryptedtext = cipher.decrypt(ciphertext)
+print("Decryptedtext:", decryptedtext)
