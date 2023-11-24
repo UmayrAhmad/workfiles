@@ -1,0 +1,22 @@
+%%writefile p1.c
+#include <stdio.h>
+int main()
+{
+FILE *fptr;
+fptr = fopen("dmu5.txt","a");
+putc('H', fptr);
+fclose(fptr);
+fptr=fopen("dmu5.txt","r");
+if (fptr == NULL)
+{
+printf("File not found!");
+}
+else
+{
+char ch;
+ch = getc(fptr);
+printf("The appended char is %c\n", ch);
+fclose(fptr);
+}
+return 0;
+}
